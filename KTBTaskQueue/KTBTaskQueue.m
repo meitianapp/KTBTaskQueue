@@ -304,7 +304,9 @@ const NSTimeInterval KTBTaskQueueDefaultPollingInterval = 10;
 
 - (void)setupDatabaseQueueAtPath:(NSString *)filePath {
     self.pathToDatabase = filePath;
-    self.databaseQueue = [FMDatabaseQueue databaseQueueWithPath:filePath];
+    // fix Unknown error calling sqlite3_step (10: disk I/O error) when device is locked
+    // https://github.com/ccgus/fmdb/issues/262
+    self.databaseQueue = [FMDatabaseQueue databaseQueueWithPath:filePath flags:SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FILEPROTECTION_NONE];
     // Create table
     [self.databaseQueue inDatabase:^(FMDatabase *db) {
         [db executeUpdate:
